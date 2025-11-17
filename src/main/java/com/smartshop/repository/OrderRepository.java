@@ -1,0 +1,12 @@
+package com.smartshop.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.smartshop.model.entity.Order;
+import com.smartshop.model.entity.User;
+
+public interface OrderRepository extends JpaRepository<Order, Long> {
+	List<Order> findByUserId(Long userId);
+}
