@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserDTO {
-    private String username;
-    private String email;
-    private String role;  // USER / ADMIN
+public class OrderItemDTO {
+    private String productName;
+    private Double price;
+    private Integer quantity;
 }

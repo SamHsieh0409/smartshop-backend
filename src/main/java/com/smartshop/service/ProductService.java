@@ -1,12 +1,13 @@
 package com.smartshop.service;
 
-import com.smartshop.model.entity.Product;
 import java.util.List;
+import com.smartshop.model.dto.ProductDTO;
 
 public interface ProductService {
-    List<Product> findAll();
-    Product findById(Long id);
-    Product save(Product product);
-    Product update(Long id, Product newData);
-    boolean deleteById(Long id);
+    List<ProductDTO> getAllProducts();
+    ProductDTO getProductById(Long id);
+    ProductDTO saveProduct(ProductDTO productDTO);
+    ProductDTO updateProduct(Long id, ProductDTO productDTO);
+    boolean deleteProduct(Long id);
+	List<ProductDTO> searchProducts(String keyword, String category);
 }

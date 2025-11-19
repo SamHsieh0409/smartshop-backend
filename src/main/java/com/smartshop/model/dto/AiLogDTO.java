@@ -4,17 +4,14 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class ProductDTO {
+
+public class AiLogDTO {
     private Long id;
-    private String name;
-    private Double price;
-    private Integer stock;
-    private String imageUrl;      // 商品圖片 URL
-    private String description;
-    private String category;
+    private String prompt;
+    private String response;
     private LocalDateTime createdAt;
 }
+

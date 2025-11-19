@@ -1,79 +1,73 @@
 package com.smartshop.controller;
 
-import com.smartshop.model.entity.Product;
-import com.smartshop.response.ApiResponse;
-import com.smartshop.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.smartshop.model.dto.ProductDTO;
+import com.smartshop.response.ApiResponse;
+import com.smartshop.service.ProductService;
+import com.smartshop.util.SessionUtil;
+
+import jakarta.servlet.http.HttpSession;
+
 @RestController
-@RequestMapping(value = {"/products", "/product"})
+@RequestMapping("/products")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
-    // 取得所有商品
-    @GetMapping(value = {"", "/"})
-    public ResponseEntity<ApiResponse<List<Product>>> getAllProducts() {
-        List<Product> products = productService.findAll();
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ApiResponse<>(200, "操作成功", products));
+    // 查詢全部
+    @GetMapping({"", "/"})
+    public ApiResponse<List<ProductDTO>> getAllProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category
+    ) {
+        List<ProductDTO> products = productService.searchProducts(keyword, category);
+        return new ApiResponse<>(200, "查詢成功", products);
     }
 
-    // 取得單一商品
+    // 查單筆
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Long id) {
-        Product product = productService.findById(id);
-        if (product == null) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(404, "找不到商品 ID：" + id, null));
-        }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ApiResponse<>(200, "查詢成功", product));
+    public ApiResponse<ProductDTO> getProduct(@PathVariable Long id) {
+        return new ApiResponse<>(200, "查詢成功", productService.getProductById(id));
     }
 
-    // 新增商品
-    @PostMapping
-    public ResponseEntity<ApiResponse<Product>> addProduct(@RequestBody Product product) {
-        Product savedProduct = productService.save(product);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(201, "新增成功", savedProduct));
+    // 新增產品(限 ADMIN)
+    @PostMapping({"", "/"})
+    public ApiResponse<ProductDTO> createProduct(@RequestBody ProductDTO productDTO, HttpSession session) {
+        SessionUtil.requireAdmin(session);
+        return new ApiResponse<>(200, "新增成功", productService.saveProduct(productDTO));
     }
 
-    // 更新商品
+    // 更新產品(限 ADMIN)
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
-        Product updatedProduct = productService.update(id, productDetails);
-        if (updatedProduct == null) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(404, "找不到商品 ID：" + id, null));
-        }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ApiResponse<>(200, "更新成功", updatedProduct));
+    public ApiResponse<ProductDTO> updateProduct(
+            @PathVariable Long id,
+            @RequestBody ProductDTO productDTO,
+            HttpSession session
+    ) {
+        SessionUtil.requireAdmin(session);
+        return new ApiResponse<>(200, "修改成功", productService.updateProduct(id, productDTO));
     }
 
-    // 刪除商品
+    // 刪除產品(限 ADMIN)
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
-        boolean deleted = productService.deleteById(id);
-        if (!deleted) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(404, "找不到要刪除的商品 ID：" + id, null));
-        }
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body(new ApiResponse<>(204, "刪除成功", null));
+    public ApiResponse<String> deleteProduct(@PathVariable Long id, HttpSession session) {
+        SessionUtil.requireAdmin(session);
+        productService.deleteProduct(id);
+        return new ApiResponse<>(200, "刪除成功", null);
     }
 }
