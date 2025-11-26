@@ -5,13 +5,10 @@ import com.smartshop.model.dto.OrderDTO;
 
 public interface OrderService {
 
-    // 取得使用者全部訂單
-    List<OrderDTO> getOrders(String username);
+    OrderDTO checkout(String username);
 
-    // 取得單一訂單
-    OrderDTO getOrderById(Long orderId);
+    List<OrderDTO> getUserOrders(String username);
 
-    // 從購物車建立訂單
-    OrderDTO createOrder(String username);
+    OrderDTO getOrderById(Long orderId, String username);  // 加入使用者檢查
 
 }

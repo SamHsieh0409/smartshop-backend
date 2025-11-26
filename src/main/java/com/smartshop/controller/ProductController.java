@@ -3,16 +3,8 @@ package com.smartshop.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 import com.smartshop.model.dto.ProductDTO;
 import com.smartshop.response.ApiResponse;
@@ -29,45 +21,83 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    // 查詢全部
-    @GetMapping({"", "/"})
+    // 查詢全部（支援 keyword / category）
+    @GetMapping
     public ApiResponse<List<ProductDTO>> getAllProducts(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String category
-    ) {
-        List<ProductDTO> products = productService.searchProducts(keyword, category);
-        return new ApiResponse<>(200, "查詢成功", products);
+            @RequestParam(required = false) String category) {
+
+        return new ApiResponse<>(
+                200,
+                "查詢成功",
+                productService.searchProducts(keyword, category)
+        );
     }
 
     // 查單筆
     @GetMapping("/{id}")
     public ApiResponse<ProductDTO> getProduct(@PathVariable Long id) {
-        return new ApiResponse<>(200, "查詢成功", productService.getProductById(id));
+        return new ApiResponse<>(200, "查詢成功",
+                productService.getProductById(id));
     }
 
-    // 新增產品(限 ADMIN)
-    @PostMapping({"", "/"})
-    public ApiResponse<ProductDTO> createProduct(@RequestBody ProductDTO productDTO, HttpSession session) {
+    // 新增產品（ADMIN）
+    @PostMapping
+    public ApiResponse<ProductDTO> createProduct(
+            @RequestBody ProductDTO dto,
+            HttpSession session) {
+
         SessionUtil.requireAdmin(session);
-        return new ApiResponse<>(200, "新增成功", productService.saveProduct(productDTO));
+        return new ApiResponse<>(200, "新增成功",
+                productService.saveProduct(dto));
     }
 
-    // 更新產品(限 ADMIN)
+    // 更新（ADMIN）
     @PutMapping("/{id}")
     public ApiResponse<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @RequestBody ProductDTO productDTO,
-            HttpSession session
-    ) {
+            @RequestBody ProductDTO dto,
+            HttpSession session) {
+
         SessionUtil.requireAdmin(session);
-        return new ApiResponse<>(200, "修改成功", productService.updateProduct(id, productDTO));
+        return new ApiResponse<>(200, "更新成功",
+                productService.updateProduct(id, dto));
     }
 
-    // 刪除產品(限 ADMIN)
+    // 刪除（ADMIN）
     @DeleteMapping("/{id}")
-    public ApiResponse<String> deleteProduct(@PathVariable Long id, HttpSession session) {
+    public ApiResponse<String> deleteProduct(
+            @PathVariable Long id,
+            HttpSession session) {
+
         SessionUtil.requireAdmin(session);
         productService.deleteProduct(id);
         return new ApiResponse<>(200, "刪除成功", null);
+    }
+
+    // 分頁（純分頁）
+    @GetMapping("/page")
+    public ApiResponse<Page<ProductDTO>> page(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        return new ApiResponse<>(200, "分頁查詢成功",
+                productService.getProductsPage(page, size, sortBy, direction));
+    }
+
+    // 整合：搜尋 + 分頁 + 排序
+    @GetMapping("/filter")
+    public ApiResponse<Page<ProductDTO>> filter(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category) {
+
+        return new ApiResponse<>(200, "查詢成功",
+                productService.filterProducts(page, size, sortBy, direction, keyword, category));
     }
 }

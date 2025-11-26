@@ -12,9 +12,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrderDTO {
     private Long id;
-    private String orderNumber;
-    private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
+    private LocalDateTime createdAt;
+    
     private List<OrderItemDTO> items;
+
+    private PaymentDTO payment;
 }

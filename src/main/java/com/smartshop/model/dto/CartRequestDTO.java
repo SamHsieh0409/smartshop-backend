@@ -3,14 +3,11 @@ package com.smartshop.model.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-@Getter
-@Setter
-@NoArgsConstructor
-public class CartItemDTO {
-    private Long productId;
-    private String productName;
-    private Double price;
-    private Integer qty;
-    private String imageUrl;
-}
 
+@Getter
+@Setter 
+@NoArgsConstructor
+public class CartRequestDTO {
+    private Long productId;
+    private Integer qty;
+}

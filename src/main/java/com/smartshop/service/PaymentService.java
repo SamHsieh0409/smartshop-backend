@@ -1,20 +1,20 @@
 package com.smartshop.service;
 
-import java.util.List;
-
 import com.smartshop.model.dto.PaymentDTO;
+
+import java.util.List;
 
 public interface PaymentService {
 
-    // 建立付款紀錄（未付款狀態）
-    PaymentDTO createPayment(String username, Long orderId, String paymentMethod);
+    // 產生綠界表單（自動 submit）
+    String generateEcpayForm(String username, Long orderId);
 
-    // 模擬付款成功
-    PaymentDTO completePayment(Long paymentId);
+    // NotifyURL 回呼處理（綠界背景通知）
+    void processEcpayCallback(String merchantTradeNo, int rtnCode, Integer amount);
 
-    // 查詢使用者付款紀錄
+    // 查詢付款紀錄
     List<PaymentDTO> getPaymentHistory(String username);
 
-    // 查詢單筆付款紀錄
     PaymentDTO getPaymentById(Long paymentId);
+
 }

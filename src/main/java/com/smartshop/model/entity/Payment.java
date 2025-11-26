@@ -31,6 +31,10 @@ public class Payment {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false, unique = true)

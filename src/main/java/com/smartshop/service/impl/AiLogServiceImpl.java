@@ -1,7 +1,6 @@
 package com.smartshop.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,35 +25,29 @@ public class AiLogServiceImpl implements AiLogService {
     @Autowired
     private ModelMapper modelMapper;
 
-
-    // ================================
-    // 新增 AI 紀錄
-    // ================================
     @Override
     public void addAiLog(String username, String prompt, String response) {
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
-        AiLog aiLog = new AiLog();
-        aiLog.setUser(user);
-        aiLog.setPrompt(prompt);
-        aiLog.setResponse(response);
+        AiLog log = new AiLog();
+        log.setUser(user);
+        log.setPrompt(prompt);
+        log.setResponse(response);
 
-        aiLogRepository.save(aiLog);
+        aiLogRepository.save(log);
     }
 
-
-    // ================================
-    // 查詢 AI 紀錄 (回傳 DTO List)
-    // ================================
     @Override
     public List<AiLogDTO> getAiLogHistory(String username) {
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
         return aiLogRepository.findByUserId(user.getId())
                 .stream()
                 .map(log -> modelMapper.map(log, AiLogDTO.class))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

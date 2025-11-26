@@ -5,18 +5,15 @@ import com.smartshop.model.dto.CartItemDTO;
 
 public interface CartService {
 
-    // 查詢使用者購物車列表
-    List<CartItemDTO> getCartItems(String username);
 
-    // 新增商品到購物車
+    List<CartItemDTO> getCart(String username);
+
     CartItemDTO addToCart(String username, Long productId, int quantity);
 
-    // 更新購物車商品數量
-    CartItemDTO updateQuantity(String username, Long cartItemId, int quantity);
+    CartItemDTO updateQuantity(String username, Long productId, int quantity);
 
-    // 移除購物車某項目
-    void removeItem(String username, Long cartItemId);
+    void removeItem(String username, Long productId);
 
-    // 清空購物車
     void clearCart(String username);
+
 }

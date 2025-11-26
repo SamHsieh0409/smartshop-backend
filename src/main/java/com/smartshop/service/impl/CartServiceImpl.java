@@ -1,9 +1,7 @@
 package com.smartshop.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,126 +26,133 @@ public class CartServiceImpl implements CartService {
     private CartRepository cartRepository;
 
     @Autowired
-    private CartItemRepository cartItemRepository;
-
-    @Autowired
     private ProductRepository productRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
+    private CartItemRepository cartItemRepository;
 
-
-    // 查詢購物車內容
     @Override
-    public List<CartItemDTO> getCartItems(String username) {
+    public List<CartItemDTO> getCart(String username) {
+
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+                .orElseThrow(() -> new RuntimeException("查無使用者"));
 
         Cart cart = getOrCreateCart(user);
 
-        return cart.getCartItems()
-                .stream()
-                .map(item -> modelMapper.map(item, CartItemDTO.class))
-                .collect(Collectors.toList());
+        List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+
+        return items.stream()
+                .map(this::convertToCartItemDTO)
+                .toList();
     }
 
-
-    // 加入購物車
     @Override
     public CartItemDTO addToCart(String username, Long productId, int quantity) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
-        Cart cart = getOrCreateCart(user);
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("商品不存在"));
-
-        // 檢查是否已有該商品 → 更新數量
-        CartItem existingItem = cart.getCartItems()
-                .stream()
-                .filter(ci -> ci.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElse(null);
-
-        if (existingItem != null) {
-            existingItem.setQty(existingItem.getQty() + quantity);
-            cartItemRepository.save(existingItem);
-            return modelMapper.map(existingItem, CartItemDTO.class);
-        }
-
-        // 建立新項目
-        CartItem newItem = new CartItem();
-        newItem.setCart(cart);
-        newItem.setProduct(product);
-        newItem.setQty(quantity);
-
-        CartItem saved = cartItemRepository.save(newItem);
-        return modelMapper.map(saved, CartItemDTO.class);
-    }
-
-
-    // 更新數量
-    @Override
-    public CartItemDTO updateQuantity(String username, Long cartItemId, int quantity) {
         if (quantity <= 0) {
             throw new RuntimeException("數量必須大於 0");
         }
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+                .orElseThrow(() -> new RuntimeException("查無使用者"));
 
-        CartItem item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new RuntimeException("購物車項目不存在"));
+        Cart cart = getOrCreateCart(user);
 
-        if (!item.getCart().getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("該購物車項目不屬於使用者");
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("查無商品"));
+
+        CartItem item = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId)
+                .orElse(null);
+
+        if (item == null) {
+            item = new CartItem();
+            item.setCart(cart);
+            item.setProduct(product);
+            item.setQty(quantity);
+        } else {
+            item.setQty(item.getQty() + quantity);
         }
+
+        cartItemRepository.save(item);
+
+        return convertToCartItemDTO(item);
+    }
+
+    @Override
+    public CartItemDTO updateQuantity(String username, Long productId, int quantity) {
+
+        if (quantity <= 0) {
+            throw new RuntimeException("數量必須大於 0");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("查無使用者"));
+
+        Cart cart = getOrCreateCart(user);
+
+        CartItem item = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId)
+                .orElseThrow(() -> new RuntimeException("商品不在購物車內"));
 
         item.setQty(quantity);
         cartItemRepository.save(item);
 
-        return modelMapper.map(item, CartItemDTO.class);
+        return convertToCartItemDTO(item);
     }
 
-
-    // 移除購物車單筆資料
     @Override
-    public void removeItem(String username, Long cartItemId) {
+    public void removeItem(String username, Long productId) {
+
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("使用者不存在"));
+                .orElseThrow(() -> new RuntimeException("查無使用者"));
 
-        CartItem item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new RuntimeException("購物車項目不存在"));
+        Cart cart = getOrCreateCart(user);
 
-        if (!item.getCart().getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("無權限刪除此項目");
-        }
+        CartItem item = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId)
+                .orElseThrow(() -> new RuntimeException("商品不在購物車內"));
 
         cartItemRepository.delete(item);
     }
 
-
-    // 清空購物車
     @Override
     public void clearCart(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("使用者不存在"));
 
-        Cart cart = getOrCreateCart(user);
-        cartItemRepository.deleteAll(cart.getCartItems());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("查無使用者"));
+
+        Cart cart = user.getCart();
+        if (cart == null) return;
+
+        List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+        cartItemRepository.deleteAll(items);
     }
 
-
-    // =================================
-    // Private Helper
-    // =================================
+    // User → Cart，如果沒有就建立一個
     private Cart getOrCreateCart(User user) {
-        return cartRepository.findByUserId(user.getId())
-                .orElseGet(() -> {
-                    Cart newCart = new Cart();
-                    newCart.setUser(user);
-                    return cartRepository.save(newCart);
-                });
+
+        Cart cart = user.getCart();
+
+        if (cart == null) {
+            cart = new Cart();
+            cart.setUser(user);
+            cartRepository.save(cart);
+
+            user.setCart(cart);
+            userRepository.save(user);
+        }
+
+        return cart;
+    }
+
+    // CartItem -> CartItemDTO
+    private CartItemDTO convertToCartItemDTO(CartItem item) {
+
+        CartItemDTO dto = new CartItemDTO();
+        dto.setProductId(item.getProduct().getId());
+        dto.setProductName(item.getProduct().getName());
+        dto.setPrice(item.getProduct().getPrice());
+        dto.setImageUrl(item.getProduct().getImageUrl());
+        dto.setQty(item.getQty());
+
+        return dto;
     }
 }

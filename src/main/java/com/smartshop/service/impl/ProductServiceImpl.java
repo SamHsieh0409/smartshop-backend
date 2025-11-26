@@ -4,6 +4,10 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.smartshop.model.dto.ProductDTO;
@@ -16,86 +20,122 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
-    
+
     @Autowired
     private ModelMapper modelMapper;
+
+
+    
+
 
     @Override
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll()
                 .stream()
-                .map(product -> modelMapper.map(product, ProductDTO.class))
+                .map(this::convertToProductDTO)
                 .toList();
     }
+
 
     @Override
     public ProductDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
-            .orElse(null);
-        return (product != null) ? modelMapper.map(product, ProductDTO.class) : null;
+                .orElseThrow(() -> new RuntimeException("查無商品"));
+        return convertToProductDTO(product);
     }
+
 
     @Override
     public ProductDTO saveProduct(ProductDTO productDTO) {
-        // DTO → Entity
+    	   	
         Product product = modelMapper.map(productDTO, Product.class);
-        
-        // save
-        product = productRepository.save(product);
-
-        // Entity → DTO
-        return modelMapper.map(product, ProductDTO.class);
+        return convertToProductDTO(productRepository.save(product));
     }
+
 
     @Override
     public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
+
         Product existing = productRepository.findById(id)
-                .orElse(null);
+                .orElseThrow(() -> new RuntimeException("查無商品"));
 
-        if (existing == null) return null;
+        modelMapper.map(productDTO, existing); // 自動覆蓋欄位
 
-        // 覆蓋可更新欄位
-        existing.setName(productDTO.getName());
-        existing.setPrice(productDTO.getPrice());
-        existing.setStock(productDTO.getStock());
-        existing.setDescription(productDTO.getDescription());
-        existing.setCategory(productDTO.getCategory());
-        existing.setImageUrl(productDTO.getImageUrl());
-
-        existing = productRepository.save(existing);
-        return modelMapper.map(existing, ProductDTO.class);
+        return convertToProductDTO(productRepository.save(existing));
     }
+
 
     @Override
     public boolean deleteProduct(Long id) {
-        if (!productRepository.existsById(id)) return false;
-        productRepository.deleteById(id);
+
+        
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("刪除失敗：商品不存在"));
+
+        productRepository.delete(product);
+
         return true;
     }
 
-	@Override
-	public List<ProductDTO> searchProducts(String keyword, String category) {
-	
 
-	    List<Product> products;
+    @Override
+    public List<ProductDTO> searchProducts(String keyword, String category) {
 
-	    boolean hasKeyword = keyword != null && !keyword.isBlank();
-	    boolean hasCategory = category != null && !category.isBlank();
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        boolean hasCategory = category != null && !category.isBlank();
 
-	    if (hasKeyword && hasCategory) {
-	        products = productRepository.findByCategoryIgnoreCaseAndNameContainingIgnoreCase(category.trim(), keyword.trim());
-	    } else if (hasCategory) {
-	        products = productRepository.findByCategoryIgnoreCase(category.trim());
-	    } else if (hasKeyword) {
-	        products = productRepository.findByNameContainingIgnoreCase(keyword.trim());
-	    } else {
-	        products = productRepository.findAll();
-	    }
+        List<Product> products;
 
-	    return products.stream()
-	            .map(product -> modelMapper.map(product, ProductDTO.class))
-	            .toList();
-	}
+        if (hasKeyword && hasCategory) {
+            products = productRepository.findByCategoryIgnoreCaseAndNameContainingIgnoreCase(
+                    category.trim(), keyword.trim());
+        } else if (hasCategory) {
+            products = productRepository.findByCategoryIgnoreCase(category.trim());
+        } else if (hasKeyword) {
+            products = productRepository.findByNameContainingIgnoreCase(keyword.trim());
+        } else {
+            products = productRepository.findAll();
+        }
 
+        return products.stream()
+                .map(this::convertToProductDTO)
+                .toList();
+    }
+
+
+    @Override
+    public Page<ProductDTO> getProductsPage(int page, int size, String sortBy, String direction) {
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return productRepository.findAll(pageable)
+                .map(this::convertToProductDTO);
+    }
+
+
+    @Override
+    public Page<ProductDTO> filterProducts(
+            int page, int size, String sortBy, String direction,
+            String keyword, String category) {
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return productRepository.filterProducts(keyword, category, pageable)
+                .map(this::convertToProductDTO);
+    }
+    
+  //Product → ProductDTO
+    private ProductDTO convertToProductDTO(Product product) {
+        return modelMapper.map(product, ProductDTO.class);
+    }
 }
+
 

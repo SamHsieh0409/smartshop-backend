@@ -15,5 +15,8 @@ public interface UserService {
 
     boolean existsByUsername(String username);
 
+    void addAiLog(String username, String prompt, String response);
+
+    List<String> getAiLogHistory(String username);
 
 }

@@ -1,17 +1,12 @@
 package com.smartshop.model.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 @Getter
-@Setter
+@Setter 
 @NoArgsConstructor
-public class AiLogDTO {
-    private Long id;
+public class AiLogCreateRequestDTO {
     private String prompt;
     private String response;
-    private LocalDateTime createdAt;
 }
