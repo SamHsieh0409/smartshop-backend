@@ -1,30 +1,33 @@
-SmartShop 是一個現代化的 AI 智慧書店前端應用程式。本專案使用 **React 19** 與 **Vite** 建構，並採用 **Material UI (MUI)** 打造精緻的響應式介面，提供流暢的購物與 AI 互動體驗。
+SmartShop 的後端 RESTful API 服務，基於 **Spring Boot 3** 開發。提供使用者認證、書籍管理、訂單處理、金流邏輯以及整合 **Ollama** 的在地端 AI 服務。
 
 ## ✨ 功能特色 (Features)
 
-### 👤 會員功能
-* **📚 商品瀏覽**：
-  * 首頁橫幅 (Hero Banner) 與隨機推薦書籍 (Featured Products)。
-  * 支援關鍵字搜尋、分類篩選 (文學小說、心理成長等)、價格排序。
-* **🤖 AI 購物助手**：
-  * 右下角懸浮聊天機器人，整合 Ollama 模型。
-  * 透過自然語言理解使用者需求 (例如：「我想找便宜的小說」)，並推薦對應書籍。
-* **🛒 購物車系統**：
-  * 即時更新商品數量、移除商品、自動計算總金額。
-* **💳 結帳與支付**：
-  * 建立訂單並支援 **模擬金流體驗**。
-  * 精美的彈出視窗模擬銀行連線、處理中與付款成功動畫。
-* **👤 會員中心**：
-  * 註冊、登入 (JWT/Session)、查看歷史訂單狀態。
-
-### ⚙️ 管理員後台 (Admin)
-* **書籍管理**：提供完整的 CRUD 功能 (新增、修改、刪除書籍)，支援圖片預覽。
+* **📡 RESTful API**：完整的商品、購物車、訂單、會員認證 API。
+* **🔒 安全性**：
+  * Spring Security 配置。
+  * 支援密碼加密 (BCrypt) 與 Session 管理。
+  * CORS 全域配置 (支援前端開發環境與 Ngrok 測試)。
+* **🧠 AI 整合 (Ollama)**：
+  * 整合 **Ollama** 本地模型 (`qwen2:4b` 或 `qwen3:4b`)。
+  * **兩階段意圖分析**：AI 自動分析使用者語句中的「關鍵字」、「分類」與「排序需求」，再進行精準資料庫搜尋。
+* **💾 資料庫**：使用 MySQL 與 Spring Data JPA 進行資料持久化。
+* **💰 金流邏輯**：
+  * 內建綠界 (ECPay) 金流串接邏輯 (產生表單、檢查碼 CheckMacValue 計算)。
+  * 支援模擬付款 API (方便本機開發測試)。
 
 ## 🛠️ 技術棧 (Tech Stack)
 
-* **核心框架**：React 19, Vite
-* **UI 函式庫**：Material UI (MUI) v6, Emotion
-* **路由管理**：React Router DOM v6
-* **HTTP 請求**：Axios (設定攔截器與 Proxy)
-* **通知提示**：自定義 Notification Context (Snackbar)
-* **狀態管理**：React Context API (AuthContext)
+* **語言**：Java 21
+* **框架**：Spring Boot 3.5.7, Spring Data JPA, Spring Security
+* **資料庫**：MySQL
+* **工具**：Lombok, ModelMapper, Gson
+* **AI 客戶端**：OkHttp (連線至本地 Ollama 服務)
+
+## API 概覽
+POST,/api/auth/login,會員登入,公開
+POST,/api/auth/register,會員註冊,公開
+GET,/api/products/filter,搜尋與篩選商品,公開
+POST,/api/ai/chat,與 AI 購物顧問對話,需登入
+POST,/api/orders/checkout,購物車結帳,需登入
+POST,/api/payments/test/pay/{id},模擬付款成功 (開發用),需登入
+GET,/api/orders/admin/all,查詢所有訂單,ADMIN
