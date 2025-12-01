@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.smartshop.model.dto.PaymentDTO;
+import com.smartshop.repository.OrderRepository;
+import com.smartshop.repository.PaymentRepository;
 import com.smartshop.response.ApiResponse;
 import com.smartshop.service.PaymentService;
 import com.smartshop.util.SessionUtil;
@@ -20,6 +22,13 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+    
+    @Autowired
+    private PaymentRepository paymentRepository;
+    
+    @Autowired
+    private OrderRepository orderRepository;
+    
 
     // 前端呼叫，產生綠界表單並導向付款頁
     @GetMapping("/ecpay/{orderId}")
@@ -66,4 +75,24 @@ public class PaymentController {
     public ApiResponse<PaymentDTO> getPayment(@PathVariable Long paymentId) {
         return new ApiResponse<>(200, "查詢成功", paymentService.getPaymentById(paymentId));
     }    
+    
+
+    // 開發專用：前端回來後自動呼叫此 API 更新狀態
+    @PostMapping("/test/pay/{orderId}")
+    public ApiResponse<String> simulatePaymentSuccess(@PathVariable Long orderId) {
+        
+        // 1. 更新訂單狀態
+        com.smartshop.model.entity.Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("訂單不存在"));
+        order.setStatus("PAID");
+        orderRepository.save(order);
+
+        // 2. 更新付款紀錄狀態 (如果有的話)
+        paymentRepository.findByOrderId(orderId).ifPresent(payment -> {
+            payment.setStatus("SUCCESS");
+            paymentRepository.save(payment);
+        });
+
+        return new ApiResponse<>(200, "開發模式：訂單已模擬付款成功", null);
+    }
 }

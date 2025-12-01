@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class AppConfig {
@@ -41,5 +43,29 @@ public class AppConfig {
         ;
 
         return http.build();
+    }
+    
+    @Bean
+    UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true); 
+        
+        
+        // 1. 允許本機前端
+        config.addAllowedOriginPattern("http://localhost:5173"); 
+        config.addAllowedOriginPattern("http://127.0.0.1:5173"); 
+
+        // 2. 允許 Ngrok 產生的網址 (使用萬用字元 * 匹配所有 ngrok-free.app 子網域)
+        config.addAllowedOriginPattern("https://*.ngrok-free.app");
+
+        // 3. 允許綠界回傳的網域 (有些情況需要，這裡先保留彈性)
+        // config.addAllowedOriginPattern("https://*.ecpay.com.tw");
+
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

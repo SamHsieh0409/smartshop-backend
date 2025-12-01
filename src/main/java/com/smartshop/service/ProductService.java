@@ -16,5 +16,6 @@ public interface ProductService {
 	Page<ProductDTO> getProductsPage(int page, int size, String sortBy, String direction);
 
 	Page<ProductDTO> filterProducts(int page, int size, String sortBy, String direction, String keyword, String category);
+	List<String> getAllCategories();
 
 }

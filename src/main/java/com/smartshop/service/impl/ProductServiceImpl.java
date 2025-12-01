@@ -24,7 +24,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ModelMapper modelMapper;
 
-
+    private static final String DEFAULT_IMAGE_URL = "/images/book.jpg";
     
 
 
@@ -47,7 +47,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO saveProduct(ProductDTO productDTO) {
-    	   	
+    	if (productDTO.getImageUrl() == null || productDTO.getImageUrl().trim().isEmpty()) {
+            productDTO.setImageUrl(DEFAULT_IMAGE_URL);
+        }
+    	
         Product product = modelMapper.map(productDTO, Product.class);
         return convertToProductDTO(productRepository.save(product));
     }
@@ -59,6 +62,10 @@ public class ProductServiceImpl implements ProductService {
         Product existing = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("查無商品"));
 
+        if (productDTO.getImageUrl() == null || productDTO.getImageUrl().trim().isEmpty()) {
+            productDTO.setImageUrl(DEFAULT_IMAGE_URL);
+        }
+        
         modelMapper.map(productDTO, existing); // 自動覆蓋欄位
 
         return convertToProductDTO(productRepository.save(existing));
@@ -132,10 +139,22 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::convertToProductDTO);
     }
     
+    @Override
+    public List<String> getAllCategories() {
+    	return productRepository.findAll()
+    			.stream()
+    			.map(p -> p.getCategory())
+    			.filter(c -> c != null && !c.isBlank())
+    			.distinct()
+    			.toList();
+    }
+    
   //Product → ProductDTO
     private ProductDTO convertToProductDTO(Product product) {
         return modelMapper.map(product, ProductDTO.class);
     }
+
+
 }
 
 

@@ -88,11 +88,10 @@ public class PaymentServiceImpl implements PaymentService {
         params.put("ItemName", "訂單編號:" + order.getId());
 
         // 綠界通知（Server）
-        params.put("ReturnURL", "http://localhost:8080/payments/ecpay/notify");
+        params.put("ReturnURL", "http://localhost:8080/api/payments/ecpay/notify");
 
         // 前端跳回頁面
-        params.put("ClientBackURL", clientBackURL);
-
+        params.put("ClientBackURL", clientBackURL + "?orderId=" + orderId);
         // 支付方式（信用卡）
         params.put("ChoosePayment", "Credit");
 

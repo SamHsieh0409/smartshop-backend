@@ -15,6 +15,7 @@ import okhttp3.Response;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.time.Duration;
 
 @Component
 public class OllamaClientImpl implements OllamaClient {
@@ -24,7 +25,11 @@ public class OllamaClientImpl implements OllamaClient {
     @Override
     public String ask(String systemPrompt, String userMessage) {
 
-        OkHttpClient client = new OkHttpClient();
+    	OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(Duration.ofSeconds(60))
+                .readTimeout(Duration.ofSeconds(60))
+                .writeTimeout(Duration.ofSeconds(60))
+                .build();
 
         JsonArray messages = new JsonArray();
 
@@ -40,7 +45,7 @@ public class OllamaClientImpl implements OllamaClient {
         messages.add(usr);
 
         JsonObject req = new JsonObject();
-        req.addProperty("model", "qwen2:4b");
+        req.addProperty("model", "qwen3:4b");
         req.addProperty("stream", true);
         req.add("messages", messages);
 

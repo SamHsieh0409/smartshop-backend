@@ -95,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setTotalAmount(total);
-        order.setStatus("COMPLETED");
+        order.setStatus("PENDING");
         orderRepository.save(order);
 
         cartItemRepository.deleteAll(cartItems);

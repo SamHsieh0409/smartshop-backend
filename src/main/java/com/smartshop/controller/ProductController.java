@@ -100,4 +100,12 @@ public class ProductController {
         return new ApiResponse<>(200, "查詢成功",
                 productService.filterProducts(page, size, sortBy, direction, keyword, category));
     }
+    
+    //取得類別
+    @GetMapping("/categories")
+    public ApiResponse<List<String>> getAllCategories() {
+        List<String> categories = productService.getAllCategories();
+        return new ApiResponse<>(200, "取得分類成功", categories);
+    }
+
 }
