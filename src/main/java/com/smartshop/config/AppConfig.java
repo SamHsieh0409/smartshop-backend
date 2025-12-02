@@ -58,7 +58,7 @@ public class AppConfig {
         // 2. 允許 Ngrok 產生的網址 (使用萬用字元 * 匹配所有 ngrok-free.app 子網域)
         config.addAllowedOriginPattern("https://*.ngrok-free.app");
 
-        // 3. 允許綠界回傳的網域 (有些情況需要，這裡先保留彈性)
+        // 3. 允許綠界回傳的網域
         // config.addAllowedOriginPattern("https://*.ecpay.com.tw");
 
         config.addAllowedHeader("*");

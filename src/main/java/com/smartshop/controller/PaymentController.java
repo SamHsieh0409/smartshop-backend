@@ -93,6 +93,6 @@ public class PaymentController {
             paymentRepository.save(payment);
         });
 
-        return new ApiResponse<>(200, "開發模式：訂單已模擬付款成功", null);
+        return new ApiResponse<>(200, "模擬付款成功", null);
     }
 }

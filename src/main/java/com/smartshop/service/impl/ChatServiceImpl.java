@@ -94,7 +94,7 @@ public class ChatServiceImpl implements ChatService {
 		}
 
 		// --- 第二階段：精準搜尋資料庫 ---
-		// 使用我們之前寫好的 filterProducts 功能
+		// 使用 filterProducts 功能
 		// 為了避免 keyword 是 "null" 字串導致搜尋失敗，做個轉換
 		String searchKeyword = (keyword == null || keyword.equalsIgnoreCase("null") || keyword.isBlank()) ? null
 				: keyword;

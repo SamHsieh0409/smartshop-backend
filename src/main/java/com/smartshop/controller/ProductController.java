@@ -21,7 +21,7 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    // 查詢全部（支援 keyword / category）
+    // 查詢全部
     @GetMapping
     public ApiResponse<List<ProductDTO>> getAllProducts(
             @RequestParam(required = false) String keyword,

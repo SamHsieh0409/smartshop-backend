@@ -66,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
             productDTO.setImageUrl(DEFAULT_IMAGE_URL);
         }
         
-        modelMapper.map(productDTO, existing); // 自動覆蓋欄位
+        modelMapper.map(productDTO, existing);
 
         return convertToProductDTO(productRepository.save(existing));
     }
