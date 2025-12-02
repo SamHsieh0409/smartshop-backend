@@ -1,4 +1,4 @@
-SmartShop 的後端 RESTful API 服務，基於 **Spring Boot 3** 開發。提供使用者認證、書籍管理、訂單處理、金流邏輯以及整合 **Ollama** 的在地端 AI 服務。
+# SmartShop 的後端 RESTful API 服務，基於 **Spring Boot 3** 開發。提供使用者認證、書籍管理、訂單處理、金流邏輯以及整合 **Ollama** 的在地端 AI 服務。
 
 ## ✨ 功能特色 (Features)
 
@@ -24,10 +24,13 @@ SmartShop 的後端 RESTful API 服務，基於 **Spring Boot 3** 開發。提�
 * **AI 客戶端**：OkHttp (連線至本地 Ollama 服務)
 
 ## API 概覽
- POST,/api/auth/login,會員登入,公開
- POST,/api/auth/register,會員註冊,公開
- GET,/api/products/filter,搜尋與篩選商品,公開
- POST,/api/ai/chat,與 AI 購物顧問對話,需登入
- POST,/api/orders/checkout,購物車結帳,需登入
- POST,/api/payments/test/pay/{id},模擬付款成功 (開發用),需登入
- GET,/api/orders/admin/all,查詢所有訂單,ADMIN
+
+| HTTP 方法 | 路徑 | 功能說明 | 權限 |
+|---:|---|---|---|
+| POST | /api/auth/login | 會員登入 | 公開 |
+| POST | /api/auth/register | 會員註冊 | 公開 |
+| GET  | /api/products/filter | 搜尋與篩選商品 | 公開 |
+| POST | /api/ai/chat | 與 AI 購物顧問對話 | 需登入 |
+| POST | /api/orders/checkout | 購物車結帳 | 需登入 |
+| POST | /api/payments/test/pay/{id} | 模擬付款成功 (開發用) | 需登入 |
+| GET | /api/orders/admin/all | 查詢所有訂單 | ADMIN |
