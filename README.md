@@ -1,5 +1,5 @@
 
-# 🧾 SmartShop Web API 規格書 (v1)
+# 🧾 SmartShop 介紹
 
 所有 API 的基礎 URL 為：`http://localhost:8080/api`
 
