@@ -52,5 +52,10 @@ public class UserController {
                 userService.findByUsername(username));
     }
 
+    @GetMapping("/isLoggedIn")
+    public ApiResponse<Boolean> isLoggedIn(HttpSession session) {
+        boolean loggedIn = SessionUtil.isLoggedIn(session);
+        return new ApiResponse<>(200, "查詢登入狀態成功", loggedIn);
+    }
 
 }

@@ -10,6 +10,7 @@ import com.smartshop.model.dto.LoginRequestDTO;
 import com.smartshop.model.dto.RegisterRequestDTO;
 import com.smartshop.model.dto.UserDTO;
 import com.smartshop.model.entity.AiLog;
+import com.smartshop.model.entity.Cart;
 import com.smartshop.model.entity.User;
 import com.smartshop.repository.AiLogRepository;
 import com.smartshop.repository.UserRepository;
@@ -78,35 +79,22 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public void addAiLog(String username, String prompt, String response) {
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("使用者不存在"));
-
-        AiLog log = new AiLog();
-        log.setUser(user);
-        log.setPrompt(prompt);
-        log.setResponse(response);
-
-        aiLogRepository.save(log);
-    }
-
-
-    @Override
-    public List<String> getAiLogHistory(String username) {
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("使用者不存在"));
-
-        return aiLogRepository.findByUserId(user.getId())
-                .stream()
-                .map(AiLog::getResponse)
-                .toList();
-    }
-
+    
   //User → UserDTO
     private UserDTO convertToUserDTO(User user) {
-        return modelMapper.map(user, UserDTO.class);
+        UserDTO dto = modelMapper.map(user, UserDTO.class);
+        
+        Cart cart = user.getCart();
+        int itemCount = 0;
+        
+        if (cart != null && cart.getCartItems() != null) {
+        	itemCount = cart.getCartItems().stream()
+        			.mapToInt(item -> item.getQty())
+        			.sum();
+        }
+        
+        dto.setCartItemCount(itemCount);
+
+        return dto;
     }
 }

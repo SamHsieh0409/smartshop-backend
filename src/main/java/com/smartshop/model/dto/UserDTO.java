@@ -11,4 +11,5 @@ public class UserDTO {
     private String username;
     private String email;
     private String role;  // USER / ADMIN
+    private Integer cartItemCount;
 }
