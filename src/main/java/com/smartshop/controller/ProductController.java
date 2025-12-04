@@ -26,7 +26,6 @@ public class ProductController {
     public ApiResponse<List<ProductDTO>> getAllProducts(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String category) {
-
         return new ApiResponse<>(
                 200,
                 "查詢成功",

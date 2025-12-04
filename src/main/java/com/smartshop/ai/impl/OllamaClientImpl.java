@@ -20,7 +20,7 @@ import java.time.Duration;
 @Component
 public class OllamaClientImpl implements OllamaClient {
 
-    private static final String OLLAMA_URL = "http://localhost:11434/api/chat";
+    private static final String OLLAMA_URL = "http://192.168.0.96:11434/api/chat";
 
     @Override
     public String ask(String systemPrompt, String userMessage) {
@@ -45,7 +45,7 @@ public class OllamaClientImpl implements OllamaClient {
         messages.add(usr);
 
         JsonObject req = new JsonObject();
-        req.addProperty("model", "qwen3:4b");
+        req.addProperty("model", "llama3.1:8b");
         req.addProperty("stream", true);
         req.add("messages", messages);
 
